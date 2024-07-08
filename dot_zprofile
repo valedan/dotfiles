@@ -1,0 +1,4 @@
+# This auto-starts X. Actually a bad idea because if i3 config is busted then computer is unusable on boot. Booting into tty seems safer.
+# if [ -z "${DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
+#   exec startx
+# fi

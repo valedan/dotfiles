@@ -28,10 +28,11 @@
 (setq user-full-name "Dan Valentine"
       user-mail-address "danvalentine256@gmail.com")
 
-(setq doom-font (font-spec :family "JetBrains Mono" :size 16)
-      doom-variable-pitch-font (font-spec :family "ETBembo" :size 20)) ;; TODO: re-evaluate this font, I didn't spend much time researching. Also can have a different font for headers.
+(setq doom-font (font-spec :family "JetBrains Mono" :size 22)
+      doom-variable-pitch-font (font-spec :family "ETBembo" :size 26)) ;; TODO: re-evaluate this font, I didn't spend much time researching. Also can have a different font for headers.
 (setq doom-theme 'doom-gruvbox)
-
+(setq select-enable-clipboard t)
+(setq select-enable-primary t)
 (setq display-line-numbers-type 'relative)
 (+global-word-wrap-mode +1)
 ;; consider turning this on if dired buffers get annoying
@@ -53,7 +54,7 @@
 (setq auto-save-visited-mode t)
 (auto-save-visited-mode +1)
 (setq projectile-project-search-path '("~/projects/"  ))
-(add-hook 'window-setup-hook 'toggle-frame-fullscreen t)
+;; (add-hook 'window-setup-hook 'toggle-frame-fullscreen t)
 (setq line-spacing 0.05)
 (add-hook 'dired-mode-hook
           (lambda ()
@@ -109,13 +110,13 @@
             (directory-files-recursively dir "\\.org$"))
           dirs))
 
-;; TODO: fix this
-;; (after! python
-;;   (setq prettify-symbols-mode nil)
-;;   )
-;;Org mode
+;; ;; TODO: fix this
+;; ;; (after! python
+;; ;;   (setq prettify-symbols-mode nil)
+;; ;;   )
+;; ;;Org mode
 (after! org
-  (setq browse-url-browser-function 'browse-url-default-macosx-browser)
+  ;; (setq browse-url-browser-function 'browse-url-default-macosx-browser)
   (setq +company-backend-alist (assq-delete-all 'text-mode +company-backend-alist))
   (add-to-list '+company-backend-alist '(text-mode (:separate company-dabbrev company-yasnippet)))
   (setq org-capture-templates
@@ -149,6 +150,7 @@
      " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
    org-agenda-current-time-string
    "◀── now ─────────────────────────────────────────────────"
+   org-modern-star 'replace
    org-modern-list
    '((?+ . "◦")
      (?- . "•")
@@ -162,9 +164,7 @@
 
 
 
-  (let* ((variable-tuple
-          (cond ((x-list-fonts "ETBookOT")         '(:font "ETBookOT"))
-                (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
+  (let* (
          (base-font-color     (face-foreground 'default nil 'default))
          (headline           `(:inherit default :weight bold :foreground ,base-font-color)))
 
@@ -232,13 +232,15 @@
 
       :title "Today"
       ;; :sort '(todo priority date)
-      :super-groups '((:name "📅 Deadlines" :deadline t )
-                      (:name "⏳ Scheduled" :scheduled t )
-                      (:name "‼️ Priority" :priority "A" )
-                      (:name "☕️ Next" :tag ("next"))
-                      (:name "📥 Inbox" :file-path "inbox" :file-path "journal")
-                      ;; (:name "✅ Completed Today" :todo ("DONE" "CANCELLED") )
-                      )
+
+      :super-groups '((:auto-outline-path t))
+      ;; :super-groups '((:name "📅 Deadlines" :deadline t )
+      ;;                 (:name "⏳ Scheduled" :scheduled t )
+      ;;                 (:name "‼️ Priority" :priority "A" )
+      ;;                 (:name "☕️ Next" :tag ("next"))
+      ;;                 (:name "📥 Inbox" :file-path "inbox" :file-path "journal")
+      ;;                 ;; (:name "✅ Completed Today" :todo ("DONE" "CANCELLED") )
+      ;;                 )
       ))
   (defun my-get-file-name (file)
     (when file
@@ -341,10 +343,17 @@
 
 (after! vterm
 
+  ;; (set-face-attribute 'vterm-color-black nil :background "#000000" :foreground "#303030") # does not work
   (defun dan/set-terminal-cursor ()
     (setq cursor-type 'bar))
 
   (add-hook 'vterm-mode-hook 'dan/set-terminal-cursor)
+  (setq vterm-shell "/usr/bin/zsh")
+
+  ;; (add-hook 'vterm-mode-hook
+  ;;           (lambda ()
+  ;;             (setq-local face-remapping-alist
+  ;;                         '((default (:background "black"))))))
   )
 
 (defun gm/jupyter-eval-region (beg end)
@@ -394,7 +403,8 @@
   (map! :nm "C--" #'evil-window-decrease-height)
   (map! :nm "C->" #'evil-window-increase-width)
   (map! :nm "C-<" #'evil-window-decrease-width)
-
+  (map! :map evil-insert-state-map
+        "C-v" #'clipboard-yank)
   (map! :n "C-t t" nil)
 
 

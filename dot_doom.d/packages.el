@@ -7,7 +7,7 @@
 
 
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
-(package! org :pin "28dc5dd1ac1325ecb6bdec3e9f72997c35eebfa0")
+;; (package! org :pin "28dc5dd1ac1325ecb6bdec3e9f72997c35eebfa0")
 (package! org-modern)
 (package! org-fancy-priorities)
 (package! org-super-agenda)
