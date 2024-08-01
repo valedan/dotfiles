@@ -53,6 +53,7 @@
 (setq which-key-idle-delay 0.25)
 (setq auto-save-visited-mode t)
 (auto-save-visited-mode +1)
+(setq warning-suppress-types (append warning-suppress-types '((org-element)))) ;; disabling this warning because it appears any time an org buffer auto saves in insert mode when there is a trailing space before the cursor. does not seem to cause problems.
 (setq projectile-project-search-path '("~/projects/"  ))
 ;; (add-hook 'window-setup-hook 'toggle-frame-fullscreen t)
 (setq line-spacing 0.05)
@@ -210,11 +211,15 @@
    '(org-super-agenda-header ((t (:inherit (outline-1) :height 1.2))))
    )
 
-  (setq task-files (append (get-org-files-in-directories '("~/org/projects" "~/org/journal" "~/org/notes")) '("~/org/inbox.org")))
+  (setq task-files (append (get-org-files-in-directories '("~/org/projects" "~/org/journal" "~/org/notes"))))
   (setq project-files (get-org-files-in-directories '("~/org/projects")))
 
-  (setq org-refile-targets (mapcar (lambda (file) (cons file '(:maxlevel . 3)))
-                                   project-files))
+  (setq org-refile-targets
+        (append
+         (mapcar (lambda (file) (cons file '(:maxlevel . 3)))
+                 project-files)
+         '(("~/org/zarchive/completed_todos.org" . (:maxlevel . 3)))))
+
   (setq org-agenda-files task-files)
 
   (defun dashboard-today ()
@@ -256,6 +261,36 @@
       `(and (todo) (not (scheduled :from 1)) (not (path "someday")) ) ; from can take number of days relative to today, eg 1
       :title "Active Tasks"
       :super-groups '((:auto-outline-path t))))
+
+  (defun open-dirvish-home-dwim ()
+    "Open Dirvish in the home directory using DWIM behavior."
+    (interactive)
+    (dirvish-dwim "~"))
+
+  (defun open-dirvish-home-fullscreen ()
+    "Open Dirvish in the home directory in fullscreen."
+    (interactive)
+    (dirvish "~" ))
+
+  (defun open-dirvish-projects-dwim ()
+    "Open Dirvish in the projects directory using DWIM behavior."
+    (interactive)
+    (dirvish-dwim "~/projects"))
+
+  (defun open-dirvish-projects-fullscreen ()
+    "Open Dirvish in the projects directory in fullscreen."
+    (interactive)
+    (dirvish "~/projects" ))
+
+  (defun open-dirvish-org-dwim ()
+    "Open Dirvish in the org directory using DWIM behavior."
+    (interactive)
+    (dirvish-dwim "~/org"))
+
+  (defun open-dirvish-org-fullscreen ()
+    "Open Dirvish in the org directory in fullscreen."
+    (interactive)
+    (dirvish "~/org" ))
 
   ;; (defun dashboard-active-tasks ()
   ;;   ""
@@ -350,6 +385,10 @@
   (add-hook 'vterm-mode-hook 'dan/set-terminal-cursor)
   (setq vterm-shell "/usr/bin/zsh")
 
+  (map! :map vterm-mode-map
+        :i  "C-v"   #'vterm-yank
+        :n  "p"   #'vterm-yank
+        )
   ;; (add-hook 'vterm-mode-hook
   ;;           (lambda ()
   ;;             (setq-local face-remapping-alist
@@ -510,10 +549,15 @@
         ;; <leader> d --- directory
         "d" nil
         (:prefix-map ("d" . "Directory")
-         :desc "Toggle sidebar" "d" #'dirvish-side
-         :desc "Full-frame Dirvish" "m" #'dirvish
          :desc "Dirvish-fd" "f" #'dirvish-fd
-         :desc "Dirvish here" "h" #'dirvish-dwim
+         :desc "Dirvish here" "d" #'dirvish-dwim
+         :desc "Dirvish here fullscreen" "D" #'dirvish
+         :desc "Dirvish projects" "p" #'open-dirvish-projects-dwim
+         :desc "Dirvish projects-fullscreen" "P" #'open-dirvish-projects-fullscreen
+         :desc "Dirvish org" "o" #'open-dirvish-org-dwim
+         :desc "Dirvish org fullscreen" "O" #'open-dirvish-org-fullscreen
+         :desc "Dirvish home" "h" #'open-dirvish-home-dwim
+         :desc "Dirvish home fullscreen" "H" #'open-dirvish-home-fullscreen
 
          )
 
@@ -1094,11 +1138,13 @@
                  "<up>" #'org-move-subtree-up
                  "<right>" #'org-demote-subtree
                  "s" #'org-sparse-tree
-                 "S" #'org-sort)
-        (:prefix ("p" . "priority")
-                 "d" #'org-priority-down
-                 "p" #'org-priority
-                 "u" #'org-priority-up))
+                 "S" #'org-sort
+                 "p" #'org-paste-subtree
+                 ))
+  ;; (:prefix ("p" . "priority")
+  ;;          "d" #'org-priority-down
+  ;;          "p" #'org-priority
+  ;;          "u" #'org-priority-up))
 
   (map! :after org-agenda
         :map org-agenda-mode-map
